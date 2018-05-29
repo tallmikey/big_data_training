@@ -30,18 +30,20 @@ select name, work_place[0], sex_age.age from employee;
 
 
 
-
-
+----CTAS
 with 
-t1 as (select concat_ws('|','HEADER', cast(current_timestamp as string), concat('employ_', cast(current_date as string), '.flat')))
+t1 as (select concat_ws('|','HEADER', cast(current_timestamp as string), concat('employ_', cast(current_date as string), '.flat')) as val, 1 as key)
 ,
-t2 as (select concat_ws('|', 'TRAILER', cast(current_date as string), concat('ROW COUNT:', cast( count(*) as string) ) ) from employee )
+t2 as (select concat_ws('|', 'TRAILER', cast(current_date as string), concat('ROW COUNT:', cast( count(*) as string) ) ) as val, 3 as key from employee )
 ,
-t3 as (select concat_ws('|', name, work_place[0], cast(sex_age.age as tring)) from employee)
-
-select * from t1
+t3 as (select concat_ws('|', name, work_place[0], cast(sex_age.age as tring)) as val, 2 as key from employee),
+emp_exp as (
+select val from t1
 union ALl 
-select * from t2 
+select val from t2 
 uninon ALL
-select * from t3 
-;
+select val from t3 
+order by key
+)
+
+select val from emp_emp;
