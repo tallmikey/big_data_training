@@ -1,0 +1,99 @@
+##Run below in hbase shell
+##Basic command
+version
+status
+whoami
+help
+
+##Operational command
+##We can either use path (/user/will/customer) as table name or namespace 'ns:customer' since hbase does not have database concept
+create 'customer', {NAME=>'addr'}, {NAME=>'order'}
+
+list
+
+desc 'customer'
+
+exists 'customer'
+
+##Syntax: put ’<table name>’,’row_key1’,’<colfamily:colname>’,’<value>’
+put 'customer', 'jsmith', 'addr:city', 'montreal'
+put 'customer', 'jsmith', 'addr:state', 'ON'
+put 'customer', 'jsmith', 'order:numb', '123456'
+put 'customer', 'jsmith', 'order:date', '2015-12-19'
+
+##Get from row key
+get 'customer', 'jsmith'
+
+##Get from CF in two ways
+get 'customer', 'jsmith','addr'
+get 'customer', 'jsmith',{COLUMNS=>['addr']}
+
+##Get from CQ
+get 'customer', 'jsmith',{COLUMNS=>['order:numb']}
+
+##Overwrite record to latest version
+put 'customer', 'jsmith', 'order:numb', '654321'
+get 'customer', 'jsmith',{COLUMNS=>['order:numb']}
+
+##Alter default version from 1 to 5
+alter 'customer',NAME=>'order', VERSIONS=>5
+
+##Put more rows
+put 'customer', 'jsmith', 'order:numb', '1235'
+put 'customer', 'jsmith', 'order:numb', '1236'
+put 'customer', 'jsmith', 'order:numb', '1237'
+put 'customer', 'jsmith', 'order:numb', '1238'
+put 'customer', 'njones', 'addr:city', 'miami'
+put 'customer', 'njones', 'addr:state', 'FL'
+put 'customer', 'njones', 'order:numb', '5555'
+put 'customer', 'tsimmons', 'addr:city', 'dallas'
+put 'customer', 'tsimmons', 'addr:state', 'TX'
+put 'customer', 'jsmith', 'addr:city', 'denver'
+put 'customer', 'jsmith', 'addr:state', 'CO'
+put 'customer', 'jsmith', 'order:numb', '6666'
+put 'customer', 'njones', 'addr:state', 'TX'
+put 'customer', 'amiller', 'addr:state', 'TX'
+
+##Search by version
+get 'customer', 'jsmith', {COLUMNS=>['order:numb'], VERSIONS => 5}
+
+##get - use row key to fetch rows
+##scan - use range to fetch rows
+scan 'customer', {COLUMNS=>['order:numb'], VERSIONS => 2}
+
+##Scan with row key range
+scan 'customer', {STARTROW => 'j', STOPROW => 't'}
+
+##Table count
+count 'customer'
+
+##DELETE Syntax
+##delete '<table_name>', '<row_key>', '<column_name >', <time_stamp_value> 
+##deleteall '<table_name>', '<row_key>'
+##HBase does not modify data in place. Deletes are
+##handled by creating new markers called tombstones. These are cleaned up along with the dead values on major compactions.
+
+##delete entire row
+deleteall 'customer','njones'
+
+##delete a cell with timestamp
+delete 'customer','njones','addr:city',1525322185913
+
+##delete a column
+delete 'customer','njones','addr:city'
+
+##We CANNOT delete the multiple rows using range in HBase shell. You can do that using Java API’s or writing script wrapper using shell, 
+
+##delete a column family, below does not work
+##delete   'customer',  'jsmith',   'addr'
+##below works
+alter 'customer','delete'=>'addr'
+
+##Clean up
+disable 'customer'
+is_disabled 'customer'
+
+##Truncate table
+truncate 'customer'
+
+drop 'customer'
