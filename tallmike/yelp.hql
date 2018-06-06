@@ -31,9 +31,9 @@ limit 30;
 create table top_ratings
 ( userid int,
   itemid int)
-PARTITION by rating int 
+PARTITIONED by (rating int)
 row FORMAT DELIMITED
 fields TERMINATED by '\t';
 
-alter table top ratings add partition (rating = 5);
-load data 
+alter table top_ratings add partition (rating = 5);
+load data inpath '/tmp/hivedemo/data/top_ratings.tsv' OVERWRITE into table top_ratings PARTITION (rating = 5); 
